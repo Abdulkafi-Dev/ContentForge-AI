@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
 
-    const userMessage = \`Original full context (for reference only):
-\${fullContext || 'No context provided'}
+    const userMessage = `Original full context (for reference only):
+${fullContext || 'No context provided'}
 
-Text to \${action}:
-\${selectedText}\`
+Text to ${action}:
+${selectedText}`
 
     const model = aiClient.getGenerativeModel({
       model: 'gemini-2.5-flash',
