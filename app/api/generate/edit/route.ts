@@ -5,7 +5,9 @@ import { aiClient } from '@/lib/ai/client'
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -22,20 +24,26 @@ export async function POST(request: NextRequest) {
     }
 
     let systemInstruction = ''
+
     if (action === 'rewrite') {
-      systemInstruction = 'You are an expert editor and copywriter. Rewrite the provided text to be more engaging, polished, and professional while retaining the original meaning. Output ONLY the rewritten text, exactly as it should appear, with absolutely no conversational filler, quotes, or markdown wrappers unless requested.'
+      systemInstruction =
+        'You are an expert editor and copywriter. Rewrite the provided text to be more engaging, polished, and professional while retaining the original meaning.'
     } else if (action === 'shorten') {
-      systemInstruction = 'You are an expert editor. Shorten the provided text to be concise, punchy, and direct while keeping the core message. Output ONLY the shortened text, exactly as it should appear, with absolutely no conversational filler, quotes, or markdown wrappers unless requested.'
+      systemInstruction =
+        'You are an expert editor. Shorten the provided text to be concise and direct while keeping the core message.'
     } else {
-      return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Invalid action' },
+        { status: 400 }
+      )
     }
 
     const userMessage =
-      "Original full context (for reference only):\n" +
-      (fullContext || "No context provided") +
-      "\n\nText to " +
+      'Original full context (for reference only):\n' +
+      (fullContext || 'No context provided') +
+      '\n\nText to ' +
       action +
-      ":\n" +
+      ':\n' +
       selectedText
 
     const model = aiClient.getGenerativeModel({
@@ -44,19 +52,29 @@ export async function POST(request: NextRequest) {
     })
 
     const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: userMessage }],
+        },
+      ],
       generationConfig: {
         temperature: 0.7,
-      }
+      },
     })
 
     const editedText = result.response.text()?.trim() || ''
 
-    return NextResponse.json({ text: editedText })
+    return NextResponse.json({
+      text: editedText,
+    })
   } catch (error: any) {
     console.error('Editor generation error:', error)
+
     return NextResponse.json(
-      { error: error.message || 'Failed to edit content.' },
+      {
+        error: error.message || 'Failed to edit content.',
+      },
       { status: 500 }
     )
   }
