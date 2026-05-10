@@ -5,21 +5,32 @@ import { aiClient } from '@/lib/ai/client'
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
+
     const {
       data: { user },
     } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
     const body = await request.json()
-    const { action, selectedText, fullContext } = body
+
+    const action = body.action
+    const selectedText = body.selectedText
+    const fullContext = body.fullContext
 
     if (!action || !selectedText) {
       return NextResponse.json(
-        { error: 'Missing required fields: action, selectedText' },
-        { status: 400 }
+        {
+          error: 'Missing required fields',
+        },
+        {
+          status: 400,
+        }
       )
     }
 
@@ -27,23 +38,25 @@ export async function POST(request: NextRequest) {
 
     if (action === 'rewrite') {
       systemInstruction =
-        'You are an expert editor and copywriter. Rewrite the provided text to be more engaging, polished, and professional while retaining the original meaning.'
+        'Rewrite the text professionally while preserving meaning.'
     } else if (action === 'shorten') {
       systemInstruction =
-        'You are an expert editor. Shorten the provided text to be concise and direct while keeping the core message.'
+        'Shorten the text while preserving the core meaning.'
     } else {
       return NextResponse.json(
-        { error: 'Invalid action' },
-        { status: 400 }
+        {
+          error: 'Invalid action',
+        },
+        {
+          status: 400,
+        }
       )
     }
 
     const userMessage =
-      'Original full context (for reference only):\n' +
-      (fullContext || 'No context provided') +
-      '\n\nText to ' +
-      action +
-      ':\n' +
+      'Context:\n' +
+      (fullContext || 'No context') +
+      '\n\nTarget Text:\n' +
       selectedText
 
     const model = aiClient.getGenerativeModel({
@@ -55,7 +68,11 @@ export async function POST(request: NextRequest) {
       contents: [
         {
           role: 'user',
-          parts: [{ text: userMessage }],
+          parts: [
+            {
+              text: userMessage,
+            },
+          ],
         },
       ],
       generationConfig: {
@@ -63,19 +80,22 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    const editedText = result.response.text()?.trim() || ''
+    const editedText =
+      result.response.text()?.trim() || ''
 
     return NextResponse.json({
       text: editedText,
     })
   } catch (error: any) {
-    console.error('Editor generation error:', error)
+    console.error(error)
 
     return NextResponse.json(
       {
-        error: error.message || 'Failed to edit content.',
+        error: error.message || 'Failed',
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     )
   }
 }
