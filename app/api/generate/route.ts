@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { aiClient } from '@/lib/ai/client'
+import { getAIClient } from '@/lib/ai/client'
 import {
   buildInstagramPrompt,
   buildFacebookPrompt,
@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
 
     const { system, userMessage, maxTokens, temperature } = promptBuilder(promptInput)
 
+    const aiClient = getAIClient()
     const model = aiClient.getGenerativeModel({
       model: 'gemini-2.5-flash',
       systemInstruction: system,
