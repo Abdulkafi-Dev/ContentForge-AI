@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getStripe } from '@/lib/stripe/client'
 
 export async function POST(request: NextRequest) {
+  console.log('[DIAGNOSTIC] checkout route evaluate. Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
+  console.log('[DIAGNOSTIC] checkout route evaluate. Gemini key exists:', !!process.env.GOOGLE_GENERATIVE_AI_API_KEY);
   try {
     const stripe = getStripe()
     const supabase = await createClient()

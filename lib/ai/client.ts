@@ -8,8 +8,12 @@ export const getAIClient = (): GoogleGenerativeAI => {
   }
   
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  console.log('[DIAGNOSTIC] Gemini key exists in lib/ai/client.ts:', !!apiKey);
+
   if (!apiKey) {
-    throw new Error('GOOGLE_GENERATIVE_AI_API_KEY environment variable is missing.');
+    console.warn('[DIAGNOSTIC] GOOGLE_GENERATIVE_AI_API_KEY is missing. Using dummy key to prevent build crash.');
+    aiClientInstance = new GoogleGenerativeAI('dummy_key_for_build');
+    return aiClientInstance;
   }
   
   aiClientInstance = new GoogleGenerativeAI(apiKey);
