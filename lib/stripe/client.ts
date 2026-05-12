@@ -1,7 +1,15 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy', {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  apiVersion: '2026-04-22.dahlia' as any,
-  typescript: true,
-})
+export function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY
+
+  if (!key) {
+    throw new Error('Missing STRIPE_SECRET_KEY')
+  }
+
+  return new Stripe(key, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    apiVersion: '2026-04-22.dahlia' as any,
+    typescript: true,
+  })
+}
